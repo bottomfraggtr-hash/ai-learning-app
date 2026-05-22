@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(node \"C:\\\\Users\\\\sohan\\\\.claude\\\\skills\\\\impeccable\\\\scripts\\\\load-context.mjs\")"
-    ]
-  }
-}
