@@ -1,0 +1,237 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                   String                 @id @default(cuid())
+  name                 String
+  email                String                 @unique
+  emailVerified        Boolean                @default(false)
+  passwordHash         String?
+  image                String?
+  onboardingCompletedAt DateTime?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  sessions             Session[]
+  accounts             Account[]
+  learnerProfile       LearnerProfile?
+  assessmentAttempts   AssessmentAttempt[]
+  roadmaps             Roadmap[]
+  progressEntries      ProgressSnapshot[]
+  careerProfiles       CareerProfile[]
+  courseRecommendations CourseRecommendation[]
+  codeReviewAttempts   CodeReviewAttempt[]
+  evaluationResults    EvaluationResult[]
+}
+
+model LearnerProfile {
+  id                String              @id @default(cuid())
+  primaryInterest   String              @default("web-development")
+  interests         String[]
+  educationLevel    String
+  backgroundSummary String
+  hoursPerWeek      Int
+  learningGoals     String[]
+  selfRatedLevel    String
+  knownLanguages    String[]
+  knownFrameworks   String[]
+  knownDatabases    String[]
+  preferredStack    String[]
+  targetRole        String
+  readinessScore    Int?
+  confidenceScore   Int?
+  paceScore         Int?
+  supportNeedScore  Int?
+  profileSummary    String?
+  assessmentStatus  String              @default("not_started")
+  assessmentProvider String?
+  lastAssessmentAt  DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  userId            String              @unique
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assessmentAttempts AssessmentAttempt[]
+}
+
+model AssessmentAttempt {
+  id               String         @id @default(cuid())
+  status           String         @default("pending")
+  provider         String
+  questions        Json
+  answers          Json?
+  scoring          Json?
+  summary          String?
+  createdAt        DateTime       @default(now())
+  completedAt      DateTime?
+  userId           String
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  learnerProfileId String
+  learnerProfile   LearnerProfile @relation(fields: [learnerProfileId], references: [id], onDelete: Cascade)
+  roadmaps         Roadmap[]
+}
+
+model CourseCatalogItem {
+  id              String                 @id @default(cuid())
+  slug            String                 @unique
+  title           String
+  provider        String
+  domain          String
+  topic           String
+  stackTags       String[]
+  level           String
+  duration        String
+  summary         String
+  url             String
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+  recommendations CourseRecommendation[]
+}
+
+model Roadmap {
+  id                  String            @id @default(cuid())
+  title               String
+  goal                String
+  domain              String
+  targetRole          String
+  preferredStack      String[]
+  generationSource    String
+  status              String            @default("draft")
+  summary             String
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  userId              String
+  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assessmentAttemptId String?
+  assessmentAttempt   AssessmentAttempt? @relation(fields: [assessmentAttemptId], references: [id], onDelete: SetNull)
+  steps               RoadmapStep[]
+}
+
+model RoadmapStep {
+  id             String  @id @default(cuid())
+  title          String
+  description    String
+  week           Int
+  estimatedHours Int
+  status         String  @default("todo")
+  resourceTitle  String?
+  resourceUrl    String?
+  roadmapId      String
+  roadmap        Roadmap @relation(fields: [roadmapId], references: [id], onDelete: Cascade)
+  evaluationResults EvaluationResult[]
+}
+
+model ProgressSnapshot {
+  id             String   @id @default(cuid())
+  streak         Int
+  completedSteps Int
+  weeklyHours    Int
+  focusScore     Int
+  nextAction     String
+  createdAt      DateTime @default(now())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CourseRecommendation {
+  id                String           @id @default(cuid())
+  title             String
+  provider          String
+  topic             String
+  level             String
+  duration          String
+  reason            String
+  url               String
+  sortOrder         Int              @default(0)
+  createdAt         DateTime         @default(now())
+  userId            String
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseCatalogItemId String?
+  courseCatalogItem CourseCatalogItem? @relation(fields: [courseCatalogItemId], references: [id], onDelete: SetNull)
+}
+
+model CareerProfile {
+  id           String   @id @default(cuid())
+  role         String
+  fitScore     Int
+  summary      String
+  growthSignal String
+  nextSkills   String[]
+  createdAt    DateTime @default(now())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CodeReviewAttempt {
+  id              String   @id @default(cuid())
+  originalCode    String
+  language        String
+  focusArea       String?
+  reviewSummary   String
+  comments        Json     // Array of { lineStart, lineEnd, severity, issue, suggestion }
+  refactoredCode  String
+  conceptsToLearn String[]
+  createdAt       DateTime @default(now())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model EvaluationResult {
+  id              String      @id @default(cuid())
+  submission      String
+  isPassing       Boolean
+  feedback        String
+  confidenceScore Int
+  createdAt       DateTime    @default(now())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stepId          String
+  step            RoadmapStep @relation(fields: [stepId], references: [id], onDelete: Cascade)
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+

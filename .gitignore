@@ -39,3 +39,19 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/app/generated/prisma
+project document.docx
+
+# Ignore Markdown except README
+*.md
+!README.md
+
+# Ignore Tests
+test/
+tests/
+__tests__/
+*.test.*
+*.spec.*
+playwright-report/
+test-results/

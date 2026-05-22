@@ -1,0 +1,39 @@
+--- tests/e2e/tier4/scenario1.spec.ts	2026-05-22 19:10:00.000000000 +0530
++++ tests/e2e/tier4/scenario1.spec.ts	2026-05-22 19:10:00.000000000 +0530
+@@ -23,10 +23,11 @@
+   await expect(page.getByRole('button', { name: /sign out|log out/i })).toBeVisible();
+   await page.getByRole('button', { name: /sign out|log out/i }).click();
+-  // Wait for redirect to home or login page
+-  await expect(page).not.toHaveURL(/.*\/onboarding/);
+ 
+-  // Go to login
+-  await page.goto('/login');
++  // Wait for redirect to home (hydration buffer: "Login" link uniquely rendered after logout)
++  const loginLink = page.getByRole('link', { name: 'Login', exact: true });
++  await expect(loginLink).toBeVisible();
++
++  // Use UI navigation to go to login instead of hard navigation
++  await loginLink.click();
+   await expect(async () => {
+     await page.getByPlaceholder(/email/i).fill(email);
+@@ -38,10 +39,12 @@
+   await expect(page).toHaveURL(/.*(\/dashboard|\/onboarding)/);
+ 
+-  // Ensure we are on /onboarding
+-  await expect(page.locator('body')).toBeVisible();
+-  if (!page.url().includes('/onboarding')) {
+-    await page.goto('/onboarding');
++  // Ensure we are on /onboarding using UI navigation instead of hard page.goto
++  if (page.url().includes('/dashboard')) {
++    // Wait for the empty state to render (hydration buffer)
++    const startOnboardingLink = page.getByRole('link', { name: /start onboarding/i });
++    await expect(startOnboardingLink).toBeVisible();
++    await startOnboardingLink.click();
+   }
+   await expect(page).toHaveURL(/.*\/onboarding/);
+ 
++  // Wait for the interactive form uniquely rendered by React
++  await expect(page.locator('[name="educationLevel"]')).toBeVisible();
++
+   // Proceed with onboarding flow
+   await expect(async () => {

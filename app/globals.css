@@ -1,26 +1,91 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-bg: oklch(0.13 0.012 55);
+  --color-surface: oklch(0.18 0.01 55);
+  --color-surface-mid: oklch(0.22 0.009 55);
+  --color-surface-high: oklch(0.27 0.008 55);
+  --color-line: oklch(0.30 0.007 55);
+  --color-line-subtle: oklch(0.22 0.007 55);
+  --color-text: oklch(0.93 0.007 75);
+  --color-muted: oklch(0.63 0.012 70);
+  --color-dim: oklch(0.44 0.008 65);
+  --color-accent: oklch(0.76 0.14 70);
+  --color-accent-fg: oklch(0.13 0.012 55);
+  --color-accent-dim: oklch(0.54 0.12 65);
+  --color-accent-subtle: oklch(0.76 0.14 70 / 0.12);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Consolas", monospace;
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-text);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+}
+
+a {
+  text-decoration: none;
+}
+
+::selection {
+  background: oklch(0.76 0.14 70 / 0.25);
+}
+
+.nav-link {
+  color: var(--color-muted);
+  transition: color 0.15s ease;
+}
+
+.nav-link:hover {
+  color: var(--color-text);
+}
+
+.nav-link-subtle {
+  color: var(--color-muted);
+  transition: color 0.15s ease;
+}
+
+.nav-link-subtle:hover {
+  color: var(--color-text);
+}
+
+.feature-cell {
+  background: var(--color-bg);
+  transition: background 0.15s ease;
+  display: block;
+}
+
+.feature-cell:hover {
+  background: var(--color-surface);
+}
+
+.prompt-btn {
+  color: var(--color-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  transition: color 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+}
+
+.prompt-btn:hover {
+  color: var(--color-text);
+  background: var(--color-surface);
+  border-color: var(--color-line-subtle);
+}
+
+.prompt-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
