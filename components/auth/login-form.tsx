@@ -17,10 +17,7 @@ export function LoginForm() {
     setError(null);
 
     startTransition(async () => {
-      const result = await signIn.email({
-        email,
-        password,
-      });
+      const result = await signIn.email({ email, password });
 
       if (result?.error) {
         setError(result.error.message || "Email or password is incorrect.");
@@ -35,51 +32,88 @@ export function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label htmlFor="login-email" className="text-sm text-slate-300">
-          Email
-        </label>
-        <input
-          id="login-email"
-          type="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          required
-          className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
-          placeholder="you@example.com"
-        />
+        <p className="text-base font-semibold" style={{ color: "var(--color-text)" }}>
+          Sign in
+        </p>
+        <p className="mt-1 text-sm" style={{ color: "var(--color-muted)" }}>
+          Enter your credentials to continue.
+        </p>
       </div>
 
-      <div>
-        <label htmlFor="login-password" className="text-sm text-slate-300">
-          Password
-        </label>
-        <input
-          id="login-password"
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          required
-          className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
-          placeholder="Enter your password"
-        />
+      <div className="space-y-4 pt-1">
+        <div>
+          <label
+            htmlFor="login-email"
+            className="text-xs font-medium uppercase tracking-wide"
+            style={{ color: "var(--color-dim)" }}
+          >
+            Email
+          </label>
+          <input
+            id="login-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="auth-input mt-1.5 w-full rounded-lg px-4 py-2.5 text-sm"
+            placeholder="you@example.com"
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="login-password"
+            className="text-xs font-medium uppercase tracking-wide"
+            style={{ color: "var(--color-dim)" }}
+          >
+            Password
+          </label>
+          <input
+            id="login-password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="auth-input mt-1.5 w-full rounded-lg px-4 py-2.5 text-sm"
+            placeholder="Enter your password"
+          />
+        </div>
       </div>
 
-      {error ? <p className="rounded-2xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-sm text-rose-100">{error}</p> : null}
+      {error ? (
+        <p
+          className="rounded-lg px-4 py-3 text-sm"
+          style={{
+            border: "1px solid oklch(0.65 0.18 25 / 0.35)",
+            background: "oklch(0.65 0.18 25 / 0.08)",
+            color: "oklch(0.80 0.12 25)",
+          }}
+        >
+          {error}
+        </p>
+      ) : null}
 
       <button
         type="submit"
         disabled={isPending}
-        className="inline-flex w-full items-center justify-center rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-70"
+        className="w-full rounded-lg py-2.5 text-sm font-semibold transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+        style={{
+          background: "var(--color-accent)",
+          color: "var(--color-accent-fg)",
+        }}
       >
         {isPending ? "Signing in..." : "Sign in"}
       </button>
 
-      <p className="text-sm text-slate-400">
+      <p className="text-sm" style={{ color: "var(--color-dim)" }}>
         Need an account?{" "}
-        <Link href="/signup" className="text-emerald-200 transition hover:text-emerald-100">
+        <Link
+          href="/signup"
+          className="font-medium transition"
+          style={{ color: "var(--color-accent-dim)" }}
+        >
           Create one here
         </Link>
-        .
       </p>
     </form>
   );

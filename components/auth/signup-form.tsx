@@ -12,11 +12,7 @@ type RegisterError = {
 
 export function SignupForm() {
   const router = useRouter();
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState<RegisterError | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -41,56 +37,91 @@ export function SignupForm() {
     });
   }
 
+  function update(field: keyof typeof form) {
+    return (e: React.ChangeEvent<HTMLInputElement>) =>
+      setForm((prev) => ({ ...prev, [field]: e.target.value }));
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label htmlFor="signup-name" className="text-sm text-slate-300">
-          Name
-        </label>
-        <input
-          id="signup-name"
-          type="text"
-          value={form.name}
-          onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
-          required
-          className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
-          placeholder="What should we call you?"
-        />
+        <p className="text-base font-semibold" style={{ color: "var(--color-text)" }}>
+          Create account
+        </p>
+        <p className="mt-1 text-sm" style={{ color: "var(--color-muted)" }}>
+          Takes about 30 seconds.
+        </p>
       </div>
 
-      <div>
-        <label htmlFor="signup-email" className="text-sm text-slate-300">
-          Email
-        </label>
-        <input
-          id="signup-email"
-          type="email"
-          value={form.email}
-          onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
-          required
-          className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
-          placeholder="you@example.com"
-        />
-      </div>
+      <div className="space-y-4 pt-1">
+        <div>
+          <label
+            htmlFor="signup-name"
+            className="text-xs font-medium uppercase tracking-wide"
+            style={{ color: "var(--color-dim)" }}
+          >
+            Name
+          </label>
+          <input
+            id="signup-name"
+            type="text"
+            value={form.name}
+            onChange={update("name")}
+            required
+            className="auth-input mt-1.5 w-full rounded-lg px-4 py-2.5 text-sm"
+            placeholder="What should we call you?"
+          />
+        </div>
 
-      <div>
-        <label htmlFor="signup-password" className="text-sm text-slate-300">
-          Password
-        </label>
-        <input
-          id="signup-password"
-          type="password"
-          value={form.password}
-          onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
-          required
-          minLength={8}
-          className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
-          placeholder="At least 8 characters"
-        />
+        <div>
+          <label
+            htmlFor="signup-email"
+            className="text-xs font-medium uppercase tracking-wide"
+            style={{ color: "var(--color-dim)" }}
+          >
+            Email
+          </label>
+          <input
+            id="signup-email"
+            type="email"
+            value={form.email}
+            onChange={update("email")}
+            required
+            className="auth-input mt-1.5 w-full rounded-lg px-4 py-2.5 text-sm"
+            placeholder="you@example.com"
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="signup-password"
+            className="text-xs font-medium uppercase tracking-wide"
+            style={{ color: "var(--color-dim)" }}
+          >
+            Password
+          </label>
+          <input
+            id="signup-password"
+            type="password"
+            value={form.password}
+            onChange={update("password")}
+            required
+            minLength={8}
+            className="auth-input mt-1.5 w-full rounded-lg px-4 py-2.5 text-sm"
+            placeholder="At least 8 characters"
+          />
+        </div>
       </div>
 
       {error?.formErrors?.length ? (
-        <p className="rounded-2xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-sm text-rose-100">
+        <p
+          className="rounded-lg px-4 py-3 text-sm"
+          style={{
+            border: "1px solid oklch(0.65 0.18 25 / 0.35)",
+            background: "oklch(0.65 0.18 25 / 0.08)",
+            color: "oklch(0.80 0.12 25)",
+          }}
+        >
           {error.formErrors[0]}
         </p>
       ) : null}
@@ -98,17 +129,24 @@ export function SignupForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="inline-flex w-full items-center justify-center rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-70"
+        className="w-full rounded-lg py-2.5 text-sm font-semibold transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+        style={{
+          background: "var(--color-accent)",
+          color: "var(--color-accent-fg)",
+        }}
       >
         {isPending ? "Creating account..." : "Create account"}
       </button>
 
-      <p className="text-sm text-slate-400">
+      <p className="text-sm" style={{ color: "var(--color-dim)" }}>
         Already have an account?{" "}
-        <Link href="/login" className="text-emerald-200 transition hover:text-emerald-100">
+        <Link
+          href="/login"
+          className="font-medium transition"
+          style={{ color: "var(--color-accent-dim)" }}
+        >
           Sign in here
         </Link>
-        .
       </p>
     </form>
   );
