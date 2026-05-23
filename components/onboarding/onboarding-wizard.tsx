@@ -109,14 +109,31 @@ export function OnboardingWizard({ initialState }: { initialState: OnboardingSta
       body: JSON.stringify(parsedProfilePayload),
     });
 
-    const payload = (await response.json()) as { error?: { formErrors?: string[] } | string };
+    const payload = (await response.json()) as { 
+      error?: string | { 
+        formErrors?: string[]; 
+        fieldErrors?: Record<string, string[]>; 
+      } 
+    };
 
     if (!response.ok) {
-      throw new Error(
-        typeof payload.error === "string"
-          ? payload.error
-          : payload.error?.formErrors?.[0] ?? "Unable to save your onboarding profile.",
-      );
+      let errorMessage = "Unable to save your onboarding profile.";
+      
+      if (typeof payload.error === "string") {
+        errorMessage = payload.error;
+      } else if (payload.error) {
+        if (payload.error.formErrors && payload.error.formErrors.length > 0) {
+          errorMessage = payload.error.formErrors[0];
+        } else if (payload.error.fieldErrors) {
+          const firstField = Object.keys(payload.error.fieldErrors)[0];
+          if (firstField && payload.error.fieldErrors[firstField].length > 0) {
+            // e.g., "backgroundSummary: String must contain at least 20 character(s)"
+            errorMessage = `${firstField}: ${payload.error.fieldErrors[firstField][0]}`;
+          }
+        }
+      }
+
+      throw new Error(errorMessage);
     }
   }
 
