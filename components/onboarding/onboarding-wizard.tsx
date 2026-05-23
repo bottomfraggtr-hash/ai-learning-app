@@ -215,7 +215,7 @@ export function OnboardingWizard({ initialState }: { initialState: OnboardingSta
     });
 
     if (!validationResult.success) {
-      setError("Please provide a bit more detail for your answers (at least 20 characters each) so we can accurately gauge your level.");
+      setError("Please ensure you have provided an answer for every question before submitting.");
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
