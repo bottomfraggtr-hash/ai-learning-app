@@ -450,6 +450,8 @@ export async function submitAssessmentForUser(userId: string, attemptId: string,
       })),
       instructions: [
         "Use continuous scores, not rigid labels.",
+        "CRITICAL: If the user answers 'I don't know', 'nothing', or shows no knowledge, their readinessScore, confidenceScore, and career fitScores MUST be very low (0-20). Do NOT artificially inflate scores just to be encouraging.",
+        "Base career fitScores strictly on their current demonstrated knowledge, not their future potential.",
         "Favor a roadmap that fits the learner's weekly hours and current confidence.",
         "Select 3 to 6 recommendations using only provided catalog slugs.",
         "Return 2 to 4 career directions relevant to the profile.",
