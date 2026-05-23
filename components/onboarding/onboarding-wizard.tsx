@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import type { AssessmentQuestion, LearnerProfile, OnboardingState } from "@/lib/types";
-import { parseCommaSeparatedList } from "@/lib/validators";
+import { onboardingProfileSchema, parseCommaSeparatedList } from "@/lib/validators";
 
 type WizardFormState = {
   interests: string;
@@ -140,6 +140,18 @@ export function OnboardingWizard({ initialState }: { initialState: OnboardingSta
   function handleGenerateAssessment(refresh = false) {
     setError(null);
     setSuccess(null);
+
+    const validationResult = onboardingProfileSchema.safeParse(parsedProfilePayload);
+    if (!validationResult.success) {
+      const fieldErrors = validationResult.error.flatten().fieldErrors;
+      const firstField = Object.keys(fieldErrors)[0] as string | undefined;
+      if (firstField && fieldErrors[firstField]?.length) {
+        setError(`Please check your input for ${firstField}: ${fieldErrors[firstField][0]}`);
+      } else {
+        setError("Please fill out all required fields.");
+      }
+      return;
+    }
 
     startTransition(async () => {
       try {
