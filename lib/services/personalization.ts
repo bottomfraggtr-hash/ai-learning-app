@@ -455,6 +455,7 @@ export async function submitAssessmentForUser(userId: string, attemptId: string,
         "Favor a roadmap that fits the learner's weekly hours and current confidence.",
         "Select 3 to 6 recommendations using only provided catalog slugs.",
         "Return 2 to 4 career directions relevant to the profile.",
+        "CRITICAL: Every step in the roadmap MUST include an actual, real-world URL (resourceUrl) to a high-quality, free, open-source learning resource (e.g., MDN Web Docs, freeCodeCamp, official framework documentation, or popular open-source GitHub repositories). Do not use placeholder URLs.",
       ],
     }),
   });
@@ -704,6 +705,9 @@ export async function regenerateRoadmapForUser(userId: string, overrides?: { goa
         summary: item.summary,
         url: item.url,
       })),
+      instructions: [
+        "CRITICAL: Every step in the roadmap MUST include an actual, real-world URL (resourceUrl) to a high-quality, free, open-source learning resource (e.g., MDN Web Docs, freeCodeCamp, official framework documentation, or popular open-source GitHub repositories). Do not use placeholder URLs."
+      ],
     }),
   });
 
