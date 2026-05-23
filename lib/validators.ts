@@ -36,7 +36,7 @@ export const onboardingProfileSchema = z.object({
   knownLanguages: z.array(z.string().trim().min(1)).max(8),
   knownFrameworks: z.array(z.string().trim().min(1)).max(8),
   knownDatabases: z.array(z.string().trim().min(1)).max(8),
-  preferredStack: z.array(z.string().trim().min(1)).min(1).max(6),
+  preferredStack: z.array(z.string().trim().min(1)).max(6),
   targetRole: z.string().trim().min(2).max(80),
 });
 
