@@ -5,7 +5,102 @@ import { useMemo, useState, useTransition } from "react";
 import type { AssessmentQuestion, LearnerProfile, OnboardingState } from "@/lib/types";
 import { assessmentSubmitSchema, onboardingProfileSchema, parseCommaSeparatedList } from "@/lib/validators";
 
+type DomainConfig = {
+  id: string;
+  label: string;
+  fields: {
+    knownLanguages: { label: string; placeholder: string };
+    knownFrameworks: { label: string; placeholder: string };
+    knownDatabases: { label: string; placeholder: string };
+    preferredStack: { label: string; placeholder: string };
+  };
+};
+
+const DOMAIN_CONFIGS: DomainConfig[] = [
+  {
+    id: "Software Engineering / Web Development",
+    label: "Software Engineering / Web Development",
+    fields: {
+      knownLanguages: { label: "Programming Languages", placeholder: "e.g. Python, TypeScript, Java" },
+      knownFrameworks: { label: "Frameworks & Libraries", placeholder: "e.g. React, Spring Boot, Django" },
+      knownDatabases: { label: "Databases & Cloud", placeholder: "e.g. PostgreSQL, AWS, Redis" },
+      preferredStack: { label: "Preferred Stack", placeholder: "e.g. MERN, LAMP, JAMstack" },
+    },
+  },
+  {
+    id: "Data Science / AI / ML",
+    label: "Data Science / AI / ML",
+    fields: {
+      knownLanguages: { label: "Languages & Core Tools", placeholder: "e.g. Python, R, Jupyter" },
+      knownFrameworks: { label: "ML Frameworks", placeholder: "e.g. PyTorch, TensorFlow, Scikit-learn" },
+      knownDatabases: { label: "Data Systems", placeholder: "e.g. Hadoop, Snowflake, Databricks" },
+      preferredStack: { label: "Preferred Methodology", placeholder: "e.g. Deep Learning, NLP, Computer Vision" },
+    },
+  },
+  {
+    id: "Medicine & Healthcare",
+    label: "Medicine & Healthcare",
+    fields: {
+      knownLanguages: { label: "Core Medical Knowledge", placeholder: "e.g. Anatomy, Pharmacology" },
+      knownFrameworks: { label: "Clinical Specialties", placeholder: "e.g. Cardiology, Pediatrics" },
+      knownDatabases: { label: "Medical Systems", placeholder: "e.g. EHR, Epic, Cerner" },
+      preferredStack: { label: "Preferred Approach", placeholder: "e.g. Evidence-Based Medicine, Holistic" },
+    },
+  },
+  {
+    id: "Law & Legal Studies",
+    label: "Law & Legal Studies",
+    fields: {
+      knownLanguages: { label: "Core Legal Areas", placeholder: "e.g. Contract Law, Torts, Constitutional Law" },
+      knownFrameworks: { label: "Jurisdictions & Specialties", placeholder: "e.g. Corporate Law, Criminal Defense" },
+      knownDatabases: { label: "Legal Research Tools", placeholder: "e.g. Westlaw, LexisNexis" },
+      preferredStack: { label: "Practice Methodology", placeholder: "e.g. Litigation, Transactional, Mediation" },
+    },
+  },
+  {
+    id: "Business & Consultancy",
+    label: "Business & Consultancy",
+    fields: {
+      knownLanguages: { label: "Core Competencies", placeholder: "e.g. Strategy, Finance, Marketing" },
+      knownFrameworks: { label: "Business Frameworks", placeholder: "e.g. SWOT, Porter's 5 Forces" },
+      knownDatabases: { label: "Enterprise Systems", placeholder: "e.g. Salesforce, SAP, Oracle" },
+      preferredStack: { label: "Consulting Methodology", placeholder: "e.g. Agile, Lean Six Sigma" },
+    },
+  },
+  {
+    id: "Academic Research",
+    label: "Academic Research",
+    fields: {
+      knownLanguages: { label: "Research Methodologies", placeholder: "e.g. Qualitative, Quantitative" },
+      knownFrameworks: { label: "Theoretical Frameworks", placeholder: "e.g. Constructivism, Positivism" },
+      knownDatabases: { label: "Research Databases & Tools", placeholder: "e.g. PubMed, JSTOR, SPSS" },
+      preferredStack: { label: "Primary Focus", placeholder: "e.g. Clinical Trials, Literature Review" },
+    },
+  },
+  {
+    id: "Design & UX",
+    label: "Design & UX",
+    fields: {
+      knownLanguages: { label: "Core Skills", placeholder: "e.g. User Research, Wireframing" },
+      knownFrameworks: { label: "Design Methodologies", placeholder: "e.g. Design Thinking, Double Diamond" },
+      knownDatabases: { label: "Design Tools", placeholder: "e.g. Figma, Adobe CC, Sketch" },
+      preferredStack: { label: "Preferred Focus", placeholder: "e.g. UI Design, Interaction Design" },
+    },
+  },
+  {
+    id: "Other",
+    label: "Other (Custom)",
+    fields: {
+      knownLanguages: { label: "Core Skills & Tools", placeholder: "e.g. Key tools you use" },
+      knownFrameworks: { label: "Key Subjects & Frameworks", placeholder: "e.g. Important concepts in your field" },
+      knownDatabases: { label: "Important Systems & Environments", placeholder: "e.g. Software or systems you use" },
+      preferredStack: { label: "Preferred Methodology/Approach", placeholder: "e.g. How you approach your work" },
+    },
+  },
+];
+
 type WizardFormState = {
+  domainCategory: string;
   primaryInterest: string;
   interests: string;
   educationLevel: string;
@@ -21,8 +116,12 @@ type WizardFormState = {
 };
 
 function createInitialForm(profile: LearnerProfile | null): WizardFormState {
+  const isKnownDomain = profile?.primaryInterest ? DOMAIN_CONFIGS.some(d => d.id === profile.primaryInterest) : false;
+  const initialDomainCategory = profile?.primaryInterest ? (isKnownDomain ? profile.primaryInterest : "Other") : "Software Engineering / Web Development";
+
   return {
-    primaryInterest: profile?.primaryInterest ?? "Web Development",
+    domainCategory: initialDomainCategory,
+    primaryInterest: profile?.primaryInterest ?? "Software Engineering / Web Development",
     interests: profile?.interests.join(", ") ?? "web development",
     educationLevel: profile?.educationLevel ?? "",
     backgroundSummary: profile?.backgroundSummary ?? "",
@@ -87,7 +186,7 @@ export function OnboardingWizard({ initialState }: { initialState: OnboardingSta
 
   const parsedProfilePayload = useMemo(
     () => ({
-      primaryInterest: form.primaryInterest.trim(),
+      primaryInterest: form.domainCategory === "Other" ? form.primaryInterest.trim() : form.domainCategory,
       interests: parseCommaSeparatedList(form.interests),
       educationLevel: form.educationLevel.trim(),
       backgroundSummary: form.backgroundSummary.trim(),
@@ -275,13 +374,35 @@ export function OnboardingWizard({ initialState }: { initialState: OnboardingSta
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <label className="text-sm text-slate-300">Primary Field of Study</label>
-              <input
-                value={form.primaryInterest}
-                onChange={(event) => setForm((current) => ({ ...current, primaryInterest: event.target.value }))}
-                className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
-                placeholder="e.g. Web Development, Medical, Data Science"
-              />
+              <select
+                value={form.domainCategory}
+                onChange={(event) => {
+                  setForm((current) => ({
+                    ...current,
+                    domainCategory: event.target.value,
+                  }));
+                }}
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none focus:border-emerald-300/40"
+              >
+                {DOMAIN_CONFIGS.map((config) => (
+                  <option key={config.id} value={config.id}>
+                    {config.label}
+                  </option>
+                ))}
+              </select>
             </div>
+
+            {form.domainCategory === "Other" && (
+              <div className="sm:col-span-2">
+                <label className="text-sm text-slate-300">Custom Field of Study</label>
+                <input
+                  value={form.primaryInterest}
+                  onChange={(event) => setForm((current) => ({ ...current, primaryInterest: event.target.value }))}
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
+                  placeholder="e.g. Astrophysics, Culinary Arts"
+                />
+              </div>
+            )}
 
             <div className="sm:col-span-2">
               <label className="text-sm text-slate-300">Specific Interests</label>
@@ -361,42 +482,50 @@ export function OnboardingWizard({ initialState }: { initialState: OnboardingSta
             </div>
 
             <div>
-              <label className="text-sm text-slate-300">Known Tools/Languages</label>
+              <label className="text-sm text-slate-300">
+                {DOMAIN_CONFIGS.find((d) => d.id === form.domainCategory)?.fields.knownLanguages.label ?? DOMAIN_CONFIGS[0].fields.knownLanguages.label}
+              </label>
               <input
                 value={form.knownLanguages}
                 onChange={(event) => setForm((current) => ({ ...current, knownLanguages: event.target.value }))}
                 className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
-                placeholder="e.g. Python, Lab Equipment, Excel"
+                placeholder={DOMAIN_CONFIGS.find((d) => d.id === form.domainCategory)?.fields.knownLanguages.placeholder ?? DOMAIN_CONFIGS[0].fields.knownLanguages.placeholder}
               />
             </div>
 
             <div>
-              <label className="text-sm text-slate-300">Known Frameworks/Subjects</label>
+              <label className="text-sm text-slate-300">
+                {DOMAIN_CONFIGS.find((d) => d.id === form.domainCategory)?.fields.knownFrameworks.label ?? DOMAIN_CONFIGS[0].fields.knownFrameworks.label}
+              </label>
               <input
                 value={form.knownFrameworks}
                 onChange={(event) => setForm((current) => ({ ...current, knownFrameworks: event.target.value }))}
                 className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
-                placeholder="e.g. React, EKG, Contract Law"
+                placeholder={DOMAIN_CONFIGS.find((d) => d.id === form.domainCategory)?.fields.knownFrameworks.placeholder ?? DOMAIN_CONFIGS[0].fields.knownFrameworks.placeholder}
               />
             </div>
 
             <div>
-              <label className="text-sm text-slate-300">Known Databases/Systems</label>
+              <label className="text-sm text-slate-300">
+                {DOMAIN_CONFIGS.find((d) => d.id === form.domainCategory)?.fields.knownDatabases.label ?? DOMAIN_CONFIGS[0].fields.knownDatabases.label}
+              </label>
               <input
                 value={form.knownDatabases}
                 onChange={(event) => setForm((current) => ({ ...current, knownDatabases: event.target.value }))}
                 className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
-                placeholder="e.g. MongoDB, Electronic Health Records"
+                placeholder={DOMAIN_CONFIGS.find((d) => d.id === form.domainCategory)?.fields.knownDatabases.placeholder ?? DOMAIN_CONFIGS[0].fields.knownDatabases.placeholder}
               />
             </div>
 
             <div>
-              <label className="text-sm text-slate-300">Preferred Stack/Methodology</label>
+              <label className="text-sm text-slate-300">
+                {DOMAIN_CONFIGS.find((d) => d.id === form.domainCategory)?.fields.preferredStack.label ?? DOMAIN_CONFIGS[0].fields.preferredStack.label}
+              </label>
               <input
                 value={form.preferredStack}
                 onChange={(event) => setForm((current) => ({ ...current, preferredStack: event.target.value }))}
                 className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
-                placeholder="e.g. MERN, Cardiology, Corporate Law"
+                placeholder={DOMAIN_CONFIGS.find((d) => d.id === form.domainCategory)?.fields.preferredStack.placeholder ?? DOMAIN_CONFIGS[0].fields.preferredStack.placeholder}
               />
             </div>
 

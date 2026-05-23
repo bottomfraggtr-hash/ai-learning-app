@@ -36,16 +36,16 @@ const generatedAssessmentSchema = z.object({
 });
 
 const generatedRoadmapSchema = z.object({
-  title: z.string().min(5).max(140),
-  goal: z.string().min(10).max(220),
-  summary: z.string().min(20).max(600),
+  title: z.string().min(2).max(140),
+  goal: z.string().min(2).max(220),
+  summary: z.string().min(2).max(1000),
   steps: z
     .array(
       z.object({
-        title: z.string().min(4).max(120),
-        description: z.string().min(12).max(400),
-        week: z.number().int().min(1).max(12),
-        estimatedHours: z.number().int().min(1).max(20),
+        title: z.string().min(2).max(120),
+        description: z.string().min(2).max(1000),
+        week: z.number().int().min(1).max(24),
+        estimatedHours: z.number().int().min(1).max(40),
         resourceSlug: z.string().optional(),
         resourceTitle: z.string().optional(),
         resourceUrl: z.string().url().optional(),
@@ -60,9 +60,9 @@ const generatedAssessmentOutcomeSchema = z.object({
   confidenceScore: z.number().int().min(0).max(100),
   paceScore: z.number().int().min(0).max(100),
   supportNeedScore: z.number().int().min(0).max(100),
-  profileSummary: z.string().min(20).max(600),
+  profileSummary: z.string().min(2).max(1000),
   focusScore: z.number().int().min(0).max(100),
-  nextAction: z.string().min(10).max(240),
+  nextAction: z.string().min(2).max(500),
   roadmap: generatedRoadmapSchema,
   recommendations: z
     .array(
@@ -74,7 +74,7 @@ const generatedAssessmentOutcomeSchema = z.object({
         level: z.string().optional(),
         duration: z.string().optional(),
         url: z.string().url().optional(),
-        reason: z.string().min(10).max(240),
+        reason: z.string().min(2).max(500),
       }),
     )
     .min(3)
@@ -82,11 +82,11 @@ const generatedAssessmentOutcomeSchema = z.object({
   careers: z
     .array(
       z.object({
-        role: z.string().min(4).max(120),
+        role: z.string().min(2).max(120),
         fitScore: z.number().int().min(0).max(100),
-        summary: z.string().min(20).max(300),
-        growthSignal: z.string().min(20).max(220),
-        nextSkills: z.array(z.string().min(2).max(80)).min(2).max(5),
+        summary: z.string().min(2).max(1000),
+        growthSignal: z.string().min(2).max(500),
+        nextSkills: z.array(z.string().min(2).max(80)).min(2).max(10),
       }),
     )
     .min(2)
@@ -96,7 +96,7 @@ const generatedAssessmentOutcomeSchema = z.object({
 const regeneratedRoadmapSchema = z.object({
   roadmap: generatedRoadmapSchema,
   focusScore: z.number().int().min(0).max(100),
-  nextAction: z.string().min(10).max(240),
+  nextAction: z.string().min(2).max(500),
 });
 
 export function getAiModel() {
