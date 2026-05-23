@@ -73,7 +73,7 @@ export const assessmentGenerateSchema = z.object({
 
 export const assessmentAnswerSchema = z.object({
   questionId: z.string().min(1),
-  answer: z.string().trim().min(8).max(1200),
+  answer: z.string().trim().min(20).max(1200),
 });
 
 export const assessmentSubmitSchema = z.object({

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import type { AssessmentQuestion, LearnerProfile, OnboardingState } from "@/lib/types";
-import { onboardingProfileSchema, parseCommaSeparatedList } from "@/lib/validators";
+import { assessmentSubmitSchema, onboardingProfileSchema, parseCommaSeparatedList } from "@/lib/validators";
 
 type WizardFormState = {
   interests: string;
@@ -200,12 +200,23 @@ export function OnboardingWizard({ initialState }: { initialState: OnboardingSta
     setError(null);
     setSuccess(null);
 
+    const formattedAnswers = assessment.questions.map((question) => ({
+      questionId: question.id,
+      answer: (answers[question.id] ?? "").trim(),
+    }));
+
+    const validationResult = assessmentSubmitSchema.safeParse({
+      attemptId: assessment.id,
+      answers: formattedAnswers,
+    });
+
+    if (!validationResult.success) {
+      setError("Please provide a bit more detail for your answers (at least 20 characters each) so we can accurately gauge your level.");
+      return;
+    }
+
     startTransition(async () => {
       try {
-        const formattedAnswers = assessment.questions.map((question) => ({
-          questionId: question.id,
-          answer: (answers[question.id] ?? "").trim(),
-        }));
 
         const response = await fetch("/api/assessment/submit", {
           method: "POST",
@@ -441,7 +452,7 @@ export function OnboardingWizard({ initialState }: { initialState: OnboardingSta
             <button
               type="button"
               onClick={handleSubmitAssessment}
-              disabled={isPending || assessment.questions.some((question) => !(answers[question.id] ?? "").trim())}
+              disabled={isPending}
               className="inline-flex items-center justify-center rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isPending ? "Scoring assessment..." : "Submit assessment and build roadmap"}
