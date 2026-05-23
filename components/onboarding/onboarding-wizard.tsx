@@ -153,6 +153,7 @@ export function OnboardingWizard({ initialState }: { initialState: OnboardingSta
       } else {
         setError("Please fill out all required fields.");
       }
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
