@@ -49,19 +49,20 @@ export default async function DashboardPage() {
             <StatCard label="Focus score" value={`${snapshot.focusScore}%`} hint="A soft signal based on your current assessment output and roadmap fit." />
           </section>
 
-          <section className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-            <article
-              className="rounded-xl p-6"
-              style={{ border: "1px solid var(--color-line-subtle)", background: "var(--color-surface)" }}
-            >
-              <p className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--color-dim)" }}>
+          <article
+            className="relative overflow-hidden rounded-2xl p-8"
+            style={{ border: "1px solid var(--color-line-subtle)", background: "var(--color-surface)" }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-transparent pointer-events-none" />
+            <div className="relative z-10">
+              <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400">
                 Next action
               </p>
-              <h2 className="mt-3 text-xl font-semibold" style={{ color: "var(--color-text)" }}>
+              <h2 className="mt-4 text-2xl font-semibold leading-snug" style={{ color: "var(--color-text)" }}>
                 {snapshot.nextAction}
               </h2>
               {roadmapState.status === "ready" ? (
-                <p className="mt-3 text-sm leading-7" style={{ color: "var(--color-muted)" }}>
+                <p className="mt-4 text-sm leading-7" style={{ color: "var(--color-muted)" }}>
                   Your current roadmap is{" "}
                   <span className="font-medium" style={{ color: "var(--color-text)" }}>
                     {roadmapState.roadmap.title}
@@ -69,12 +70,14 @@ export default async function DashboardPage() {
                   with {roadmapState.roadmap.steps.length} tracked steps.
                 </p>
               ) : (
-                <p className="mt-3 text-sm leading-7" style={{ color: "var(--color-muted)" }}>
+                <p className="mt-4 text-sm leading-7" style={{ color: "var(--color-muted)" }}>
                   Your learner profile is ready. Generate or refresh the roadmap whenever you want to tune the plan.
                 </p>
               )}
-            </article>
+            </div>
+          </article>
 
+          <section className="grid gap-4 lg:grid-cols-[1fr_2fr] items-start">
             <article
               className="rounded-xl p-6"
               style={{ border: "1px solid var(--color-line-subtle)", background: "var(--color-surface)" }}
@@ -85,29 +88,29 @@ export default async function DashboardPage() {
                 </p>
                 <Link
                   href="/career"
-                  className="text-sm transition"
+                  className="text-sm transition hover:opacity-70"
                   style={{ color: "var(--color-accent-dim)" }}
                 >
-                  Open page
+                  View all
                 </Link>
               </div>
-              <div className="mt-4 space-y-3">
+              <div className="mt-5 space-y-4">
                 {careersState.status === "ready" ? (
                   careersState.items.slice(0, 2).map((career) => (
                     <div
                       key={career.id}
-                      className="rounded-lg p-4"
+                      className="rounded-lg p-5"
                       style={{ border: "1px solid var(--color-line-subtle)", background: "var(--color-surface-mid)" }}
                     >
                       <div className="flex items-center justify-between gap-3">
                         <h3 className="text-base font-semibold" style={{ color: "var(--color-text)" }}>
                           {career.role}
                         </h3>
-                        <span className="text-sm" style={{ color: "var(--color-accent)" }}>
-                          {career.fitScore}%
+                        <span className="shrink-0 rounded-full bg-white/5 px-2.5 py-1 text-xs font-medium" style={{ color: "var(--color-accent)" }}>
+                          {career.fitScore}% Match
                         </span>
                       </div>
-                      <p className="mt-2 text-sm leading-6" style={{ color: "var(--color-muted)" }}>
+                      <p className="mt-3 text-sm leading-6" style={{ color: "var(--color-muted)" }}>
                         {career.summary}
                       </p>
                     </div>
@@ -119,16 +122,15 @@ export default async function DashboardPage() {
                 )}
               </div>
             </article>
-          </section>
 
-          <section className="grid gap-4 lg:grid-cols-2">
-            <article
-              className="rounded-xl p-6"
-              style={{ border: "1px solid var(--color-line-subtle)", background: "var(--color-surface)" }}
-            >
-              <p className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--color-dim)" }}>
-                Roadmap timeline
-              </p>
+            <div className="space-y-4">
+              <article
+                className="rounded-xl p-6"
+                style={{ border: "1px solid var(--color-line-subtle)", background: "var(--color-surface)" }}
+              >
+                <p className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--color-dim)" }}>
+                  Roadmap timeline
+                </p>
               {roadmapState.status === "ready" ? (
                 <div className="mt-8 relative border-l-2 border-white/10 ml-3 space-y-8 pb-4">
                   {roadmapState.roadmap.steps.map((step, index) => (
@@ -234,6 +236,7 @@ export default async function DashboardPage() {
                 </p>
               )}
             </article>
+            </div>
           </section>
         </>
       )}
