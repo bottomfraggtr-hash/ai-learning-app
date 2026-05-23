@@ -216,6 +216,7 @@ export function OnboardingWizard({ initialState }: { initialState: OnboardingSta
 
     if (!validationResult.success) {
       setError("Please provide a bit more detail for your answers (at least 20 characters each) so we can accurately gauge your level.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
@@ -398,7 +399,19 @@ export function OnboardingWizard({ initialState }: { initialState: OnboardingSta
               disabled={isPending || !initialState.aiReady}
               className="inline-flex items-center justify-center rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {assessment ? "Reuse saved assessment" : "Save profile and create assessment"}
+              {isPending ? (
+                <>
+                  <svg className="mr-2 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                  Processing...
+                </>
+              ) : assessment ? (
+                "Reuse saved assessment"
+              ) : (
+                "Save profile and create assessment"
+              )}
             </button>
             <button
               type="button"
@@ -439,7 +452,17 @@ export function OnboardingWizard({ initialState }: { initialState: OnboardingSta
               disabled={isPending}
               className="inline-flex items-center justify-center rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {isPending ? "Scoring assessment..." : "Submit assessment and build roadmap"}
+              {isPending ? (
+                <>
+                  <svg className="mr-2 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                  Scoring assessment...
+                </>
+              ) : (
+                "Submit assessment and build roadmap"
+              )}
             </button>
           </div>
         </section>
