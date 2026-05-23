@@ -361,12 +361,42 @@ export function OnboardingWizard({ initialState }: { initialState: OnboardingSta
             </div>
 
             <div>
-              <label className="text-sm text-slate-300">Current Skills & Knowledge</label>
+              <label className="text-sm text-slate-300">Known Tools/Languages</label>
               <input
                 value={form.knownLanguages}
                 onChange={(event) => setForm((current) => ({ ...current, knownLanguages: event.target.value }))}
                 className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
-                placeholder="e.g. Python, Anatomy, Financial Analysis"
+                placeholder="e.g. Python, Lab Equipment, Excel"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm text-slate-300">Known Frameworks/Subjects</label>
+              <input
+                value={form.knownFrameworks}
+                onChange={(event) => setForm((current) => ({ ...current, knownFrameworks: event.target.value }))}
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
+                placeholder="e.g. React, EKG, Contract Law"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm text-slate-300">Known Databases/Systems</label>
+              <input
+                value={form.knownDatabases}
+                onChange={(event) => setForm((current) => ({ ...current, knownDatabases: event.target.value }))}
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
+                placeholder="e.g. MongoDB, Electronic Health Records"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm text-slate-300">Preferred Stack/Methodology</label>
+              <input
+                value={form.preferredStack}
+                onChange={(event) => setForm((current) => ({ ...current, preferredStack: event.target.value }))}
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
+                placeholder="e.g. MERN, Cardiology, Corporate Law"
               />
             </div>
 
