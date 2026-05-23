@@ -19,9 +19,11 @@ export async function getStudyBuddyReply(
     targetRole?: string | null;
     profileSummary?: string | null;
     preferredStack?: string[];
+    primaryInterest?: string;
   },
 ): Promise<StudyBuddyResponse> {
-  const system = `You are a calm study buddy for a web-development learner.
+  const domain = context?.primaryInterest ?? "web-development";
+  const system = `You are a calm study buddy for a ${domain} learner.
 Learner name: ${context?.name ?? "there"}.
 Target role: ${context?.targetRole ?? "not set"}.
 Preferred stack: ${context?.preferredStack?.join(", ") || "not set"}.

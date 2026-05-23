@@ -67,7 +67,13 @@ const generatedAssessmentOutcomeSchema = z.object({
   recommendations: z
     .array(
       z.object({
-        slug: z.string().min(1),
+        slug: z.string().optional(),
+        title: z.string().optional(),
+        provider: z.string().optional(),
+        topic: z.string().optional(),
+        level: z.string().optional(),
+        duration: z.string().optional(),
+        url: z.string().url().optional(),
         reason: z.string().min(10).max(240),
       }),
     )
@@ -240,13 +246,13 @@ export function isPersonalizationAiReady() {
   return Boolean(process.env.OPENAI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY);
 }
 
-export async function saveLearnerProfile(userId: string, input: Omit<RoadmapContext, "primaryInterest">) {
+export async function saveLearnerProfile(userId: string, input: RoadmapContext) {
   const profile = await prisma.learnerProfile.upsert({
     where: {
       userId,
     },
     update: {
-      primaryInterest: "web-development",
+      primaryInterest: input.primaryInterest,
       interests: input.interests,
       educationLevel: input.educationLevel,
       backgroundSummary: input.backgroundSummary,
@@ -269,7 +275,7 @@ export async function saveLearnerProfile(userId: string, input: Omit<RoadmapCont
     },
     create: {
       userId,
-      primaryInterest: "web-development",
+      primaryInterest: input.primaryInterest,
       interests: input.interests,
       educationLevel: input.educationLevel,
       backgroundSummary: input.backgroundSummary,
@@ -357,7 +363,7 @@ export async function generateAssessmentForUser(userId: string, refresh = false)
     model,
     schema: generatedAssessmentSchema,
     system:
-      "You create short onboarding assessments for web-development learners. Keep the questions practical, stack-aware, encouraging, and suitable for adult self-learners. Return JSON only.",
+      `You create short onboarding assessments for learners studying ${profile.primaryInterest}. Keep the questions practical, domain-aware, encouraging, and suitable for adult self-learners. Return JSON only.`,
     prompt: JSON.stringify({
       task: "Generate 5 to 8 assessment questions for the learner profile.",
       learnerProfile: buildRoadmapContext(profile),
@@ -432,7 +438,7 @@ export async function submitAssessmentForUser(userId: string, attemptId: string,
     model,
     schema: generatedAssessmentOutcomeSchema,
     system:
-      "You score web-development learner assessments and create personalized study plans. Be realistic, encouraging, and specific. Return JSON only.",
+      `You score assessments and create personalized study plans for learners studying ${profile.primaryInterest}. Be realistic, encouraging, and specific. Return JSON only.`,
     prompt: JSON.stringify({
       task: "Score the learner and produce a personalized learning plan.",
       learnerProfile: buildRoadmapContext(profile),
@@ -453,9 +459,9 @@ export async function submitAssessmentForUser(userId: string, attemptId: string,
         "CRITICAL: If the user answers 'I don't know', 'nothing', or shows no knowledge, their readinessScore, confidenceScore, and career fitScores MUST be very low (0-20). Do NOT artificially inflate scores just to be encouraging.",
         "Base career fitScores strictly on their current demonstrated knowledge, not their future potential.",
         "Favor a roadmap that fits the learner's weekly hours and current confidence.",
-        "Select 3 to 6 recommendations using only provided catalog slugs.",
+        "If the provided catalog has relevant courses, use those slugs for recommendations. If the catalog is irrelevant or empty for this field, generate your own recommendations providing title, url, provider, and topic.",
         "Return 2 to 4 career directions relevant to the profile.",
-        "CRITICAL: Every step in the roadmap MUST include an actual, real-world URL (resourceUrl) to a high-quality, free, open-source learning resource (e.g., MDN Web Docs, freeCodeCamp, official framework documentation, or popular open-source GitHub repositories). Do not use placeholder URLs.",
+        "CRITICAL: Every step in the roadmap MUST include an actual, real-world URL (resourceUrl) to a high-quality, free resource (e.g., Wikipedia, Khan Academy, official documentation, or open-source repositories). Do not use placeholder URLs.",
       ],
     }),
   });
@@ -471,42 +477,47 @@ export async function submitAssessmentForUser(userId: string, attemptId: string,
   const catalogBySlug = new Map(catalogMatches.map((item) => [item.slug, item]));
   const selectedRecommendations = result.object.recommendations
     .map((item, index) => {
-      const match = catalogBySlug.get(item.slug);
-
-      if (!match) {
-        return null;
+      if (item.slug) {
+        const match = catalogBySlug.get(item.slug);
+        if (match) {
+          return {
+            id: `${match.slug}-${index}`,
+            title: match.title,
+            provider: match.provider,
+            topic: match.topic,
+            level: match.level,
+            duration: match.duration,
+            reason: item.reason,
+            url: match.url,
+            sortOrder: index,
+            courseCatalogItemId: match.id,
+          };
+        }
       }
 
-      return {
-        id: `${match.slug}-${index}`,
-        title: match.title,
-        provider: match.provider,
-        topic: match.topic,
-        level: match.level,
-        duration: match.duration,
-        reason: item.reason,
-        url: match.url,
-        sortOrder: index,
-        courseCatalogItemId: match.id,
-      };
+      if (item.title && item.url) {
+        return {
+          id: `custom-${index}`,
+          title: item.title,
+          provider: item.provider ?? "Web Resource",
+          topic: item.topic ?? profile.primaryInterest,
+          level: item.level ?? "Beginner",
+          duration: item.duration ?? "Self-paced",
+          reason: item.reason,
+          url: item.url,
+          sortOrder: index,
+          courseCatalogItemId: null,
+        };
+      }
+
+      return null;
     })
     .filter((item): item is NonNullable<typeof item> => item !== null);
 
   const fallbackRecommendations =
     selectedRecommendations.length > 0
       ? selectedRecommendations
-      : catalogMatches.slice(0, 3).map((item, index) => ({
-          id: `${item.slug}-${index}`,
-          title: item.title,
-          provider: item.provider,
-          topic: item.topic,
-          level: item.level,
-          duration: item.duration,
-          reason: `Supports the ${profile.targetRole} path and matches your ${profile.selfRatedLevel} experience level.`,
-          url: item.url,
-          sortOrder: index,
-          courseCatalogItemId: item.id,
-        }));
+      : [];
 
   const roadmapData = result.object.roadmap;
   const sortedSteps = [...roadmapData.steps].sort((left, right) => left.week - right.week);
@@ -566,7 +577,7 @@ export async function submitAssessmentForUser(userId: string, attemptId: string,
         goal: roadmapData.goal,
         summary: roadmapData.summary,
         status: "active",
-        domain: "web-development",
+        domain: profile.primaryInterest,
         targetRole: profile.targetRole,
         preferredStack: profile.preferredStack,
         generationSource: provider,
@@ -687,7 +698,7 @@ export async function regenerateRoadmapForUser(userId: string, overrides?: { goa
     model,
     schema: regeneratedRoadmapSchema,
     system:
-      "You refresh personalized learning roadmaps for web-development learners. Keep the roadmap realistic, stack-aware, and matched to weekly availability. Return JSON only.",
+      `You refresh personalized learning roadmaps for learners studying ${profile.primaryInterest}. Keep the roadmap realistic, domain-aware, and matched to weekly availability. Return JSON only.`,
     prompt: JSON.stringify({
       task: "Refresh the learner roadmap using their stored profile and prior assessment summary.",
       learnerProfile: {
@@ -706,7 +717,7 @@ export async function regenerateRoadmapForUser(userId: string, overrides?: { goa
         url: item.url,
       })),
       instructions: [
-        "CRITICAL: Every step in the roadmap MUST include an actual, real-world URL (resourceUrl) to a high-quality, free, open-source learning resource (e.g., MDN Web Docs, freeCodeCamp, official framework documentation, or popular open-source GitHub repositories). Do not use placeholder URLs."
+        "CRITICAL: Every step in the roadmap MUST include an actual, real-world URL (resourceUrl) to a high-quality, free learning resource (e.g., Wikipedia, Khan Academy, official documentation, or open-source repositories). Do not use placeholder URLs."
       ],
     }),
   });
@@ -735,7 +746,7 @@ export async function regenerateRoadmapForUser(userId: string, overrides?: { goa
         goal: overrides?.goal ?? result.object.roadmap.goal,
         summary: result.object.roadmap.summary,
         status: "active",
-        domain: "web-development",
+        domain: profile.primaryInterest,
         targetRole: profile.targetRole,
         preferredStack: profile.preferredStack,
         generationSource: provider,

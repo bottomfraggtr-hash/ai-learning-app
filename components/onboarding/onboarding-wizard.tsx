@@ -6,6 +6,7 @@ import type { AssessmentQuestion, LearnerProfile, OnboardingState } from "@/lib/
 import { assessmentSubmitSchema, onboardingProfileSchema, parseCommaSeparatedList } from "@/lib/validators";
 
 type WizardFormState = {
+  primaryInterest: string;
   interests: string;
   educationLevel: string;
   backgroundSummary: string;
@@ -21,6 +22,7 @@ type WizardFormState = {
 
 function createInitialForm(profile: LearnerProfile | null): WizardFormState {
   return {
+    primaryInterest: profile?.primaryInterest ?? "Web Development",
     interests: profile?.interests.join(", ") ?? "web development",
     educationLevel: profile?.educationLevel ?? "",
     backgroundSummary: profile?.backgroundSummary ?? "",
@@ -30,8 +32,8 @@ function createInitialForm(profile: LearnerProfile | null): WizardFormState {
     knownLanguages: profile?.knownLanguages.join(", ") ?? "html, css, javascript",
     knownFrameworks: profile?.knownFrameworks.join(", ") ?? "",
     knownDatabases: profile?.knownDatabases.join(", ") ?? "",
-    preferredStack: profile?.preferredStack.join(", ") ?? "nextjs, typescript, postgresql",
-    targetRole: profile?.targetRole ?? "Full-stack web developer",
+    preferredStack: profile?.preferredStack.join(", ") ?? "",
+    targetRole: profile?.targetRole ?? "",
   };
 }
 
@@ -85,6 +87,7 @@ export function OnboardingWizard({ initialState }: { initialState: OnboardingSta
 
   const parsedProfilePayload = useMemo(
     () => ({
+      primaryInterest: form.primaryInterest.trim(),
       interests: parseCommaSeparatedList(form.interests),
       educationLevel: form.educationLevel.trim(),
       backgroundSummary: form.backgroundSummary.trim(),
@@ -144,9 +147,9 @@ export function OnboardingWizard({ initialState }: { initialState: OnboardingSta
     const validationResult = onboardingProfileSchema.safeParse(parsedProfilePayload);
     if (!validationResult.success) {
       const fieldErrors = validationResult.error.flatten().fieldErrors;
-      const firstField = Object.keys(fieldErrors)[0] as string | undefined;
+      const firstField = Object.keys(fieldErrors)[0] as keyof typeof fieldErrors | undefined;
       if (firstField && fieldErrors[firstField]?.length) {
-        setError(`Please check your input for ${firstField}: ${fieldErrors[firstField][0]}`);
+        setError(`Please check your input for ${String(firstField)}: ${fieldErrors[firstField]![0]}`);
       } else {
         setError("Please fill out all required fields.");
       }
@@ -269,12 +272,22 @@ export function OnboardingWizard({ initialState }: { initialState: OnboardingSta
           <h2 className="mt-3 text-2xl font-semibold text-white">Tell us where you are right now</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className="text-sm text-slate-300">Interests</label>
+              <label className="text-sm text-slate-300">Primary Field of Study</label>
+              <input
+                value={form.primaryInterest}
+                onChange={(event) => setForm((current) => ({ ...current, primaryInterest: event.target.value }))}
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
+                placeholder="e.g. Web Development, Medical, Data Science"
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="text-sm text-slate-300">Specific Interests</label>
               <input
                 value={form.interests}
                 onChange={(event) => setForm((current) => ({ ...current, interests: event.target.value }))}
                 className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
-                placeholder="web development, frontend, backend"
+                placeholder="e.g. Frontend, Anatomy, Corporate Law"
               />
             </div>
 
@@ -325,7 +338,7 @@ export function OnboardingWizard({ initialState }: { initialState: OnboardingSta
 
         <article className="rounded-[1.75rem] border border-white/10 bg-white/5 p-6">
           <p className="text-sm uppercase tracking-[0.2em] text-emerald-200/80">Step 2</p>
-          <h2 className="mt-3 text-2xl font-semibold text-white">Shape the web-dev path</h2>
+          <h2 className="mt-3 text-2xl font-semibold text-white">Shape your learning path</h2>
           <div className="mt-5 space-y-4">
             <div>
               <label className="text-sm text-slate-300">Current level</label>
@@ -346,52 +359,52 @@ export function OnboardingWizard({ initialState }: { initialState: OnboardingSta
             </div>
 
             <div>
-              <label className="text-sm text-slate-300">Known languages</label>
+              <label className="text-sm text-slate-300">Known Tools/Languages</label>
               <input
                 value={form.knownLanguages}
                 onChange={(event) => setForm((current) => ({ ...current, knownLanguages: event.target.value }))}
                 className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
-                placeholder="html, css, javascript, typescript"
+                placeholder="e.g. Python, Lab Equipment, Excel"
               />
             </div>
 
             <div>
-              <label className="text-sm text-slate-300">Known frameworks</label>
+              <label className="text-sm text-slate-300">Known Frameworks/Subjects</label>
               <input
                 value={form.knownFrameworks}
                 onChange={(event) => setForm((current) => ({ ...current, knownFrameworks: event.target.value }))}
                 className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
-                placeholder="react, nextjs, express"
+                placeholder="e.g. React, EKG, Contract Law"
               />
             </div>
 
             <div>
-              <label className="text-sm text-slate-300">Known databases</label>
+              <label className="text-sm text-slate-300">Known Databases/Systems</label>
               <input
                 value={form.knownDatabases}
                 onChange={(event) => setForm((current) => ({ ...current, knownDatabases: event.target.value }))}
                 className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
-                placeholder="mongodb, postgresql"
+                placeholder="e.g. MongoDB, Electronic Health Records"
               />
             </div>
 
             <div>
-              <label className="text-sm text-slate-300">Preferred stack</label>
+              <label className="text-sm text-slate-300">Preferred Stack/Methodology</label>
               <input
                 value={form.preferredStack}
                 onChange={(event) => setForm((current) => ({ ...current, preferredStack: event.target.value }))}
                 className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
-                placeholder="mern or nextjs, typescript, postgresql"
+                placeholder="e.g. MERN, Cardiology, Corporate Law"
               />
             </div>
 
             <div>
-              <label className="text-sm text-slate-300">Target role</label>
+              <label className="text-sm text-slate-300">Target Role</label>
               <input
                 value={form.targetRole}
                 onChange={(event) => setForm((current) => ({ ...current, targetRole: event.target.value }))}
                 className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-emerald-300/40"
-                placeholder="Full-stack developer"
+                placeholder="e.g. Full-stack developer, Cardiologist"
               />
             </div>
           </div>

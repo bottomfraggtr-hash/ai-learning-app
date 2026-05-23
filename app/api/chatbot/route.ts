@@ -22,6 +22,7 @@ export async function POST(request: Request) {
     targetRole: user.learnerProfile?.targetRole ?? null,
     profileSummary: user.learnerProfile?.profileSummary ?? null,
     preferredStack: user.learnerProfile?.preferredStack ?? [],
+    primaryInterest: user.learnerProfile?.primaryInterest ?? undefined,
   });
   return NextResponse.json(reply);
 }

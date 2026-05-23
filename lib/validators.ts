@@ -26,6 +26,7 @@ export const loginInputSchema = z.object({
 });
 
 export const onboardingProfileSchema = z.object({
+  primaryInterest: z.string().trim().min(2).max(100),
   interests: z.array(z.string().trim().min(2)).min(1).max(6),
   educationLevel: z.string().trim().min(2).max(80),
   backgroundSummary: z.string().trim().min(20).max(1200),
@@ -40,6 +41,7 @@ export const onboardingProfileSchema = z.object({
 });
 
 export const onboardingProfileJsonSchema = z.object({
+  primaryInterest: z.string(),
   interests: z.array(z.string()).default([]),
   educationLevel: z.string(),
   backgroundSummary: z.string(),
@@ -54,6 +56,7 @@ export const onboardingProfileJsonSchema = z.object({
 });
 
 export const onboardingProfileFormSchema = z.object({
+  primaryInterest: z.string().trim(),
   interests: commaSeparatedString,
   educationLevel: z.string().trim(),
   backgroundSummary: z.string().trim(),

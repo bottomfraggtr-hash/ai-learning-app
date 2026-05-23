@@ -16,12 +16,13 @@ export const proactiveSuggestionSchema = z.object({
 export type ProactiveSuggestion = z.infer<typeof proactiveSuggestionSchema>;
 
 export async function generateProactiveSuggestion(
-  profile: { targetRole?: string; preferredStack?: string[] } | null | undefined,
+  profile: { targetRole?: string; preferredStack?: string[]; primaryInterest?: string } | null | undefined,
   progress: DashboardSnapshot,
   roadmap: LearningRoadmap | null | undefined,
   chatHistory: { role: string; text: string }[] = []
 ): Promise<ProactiveSuggestion> {
-  const system = `You are a proactive study buddy for a web-development learner.
+  const domain = profile?.primaryInterest ?? "web-development";
+  const system = `You are a proactive study buddy for a ${domain} learner.
 Review the user's progress snapshot, active roadmap steps, and recent chat history.
 If focus is low, offer a review. If they are on a streak, encourage them.
 Provide a short, actionable tip.
