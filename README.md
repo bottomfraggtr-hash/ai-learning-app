@@ -3,10 +3,13 @@
 A Next.js application that provides personalized learning roadmaps, AI-driven assessments, and a study buddy chatbot. Built for a college project.
 
 ## Tech Stack
-- **Framework**: Next.js (App Router)
-- **Database**: Supabase (PostgreSQL) + Prisma ORM
+- **Framework**: Next.js 16 (App Router) with React 19
+- **Styling**: Tailwind CSS v4
+- **Database**: PostgreSQL with Prisma ORM
 - **Authentication**: Better Auth
-- **AI Provider**: Google Generative AI (Gemini Flash)
+- **AI Integration**: Vercel AI SDK with Google Gemini and OpenAI providers
+- **Data Validation**: Zod
+- **Testing**: Playwright and MSW (Mock Service Worker)
 
 ## Environment Variables
 
