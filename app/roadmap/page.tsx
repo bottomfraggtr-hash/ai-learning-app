@@ -83,45 +83,51 @@ export default async function RoadmapPage() {
             <p className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--color-dim)" }}>
               Milestones
             </p>
-            <div className="mt-5 space-y-3">
+            <div className="mt-8 relative border-l-2 border-white/10 ml-3 space-y-8 pb-4">
               {roadmapState.roadmap.steps.map((step) => (
                 <div
                   key={step.id}
-                  className="rounded-lg p-4"
-                  style={{ border: "1px solid var(--color-line-subtle)", background: "var(--color-surface-mid)" }}
+                  className="relative pl-8"
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <h3 className="text-base font-semibold" style={{ color: "var(--color-text)" }}>
-                      Week {step.week}: {step.title}
-                    </h3>
-                    <div
-                      className="flex items-center gap-3 text-xs uppercase tracking-wide"
-                      style={{ color: "var(--color-dim)" }}
-                    >
-                      <span>{step.status}</span>
-                      <span>{step.estimatedHours}h</span>
+                  <div className="absolute -left-[9px] top-1.5 h-4 w-4 rounded-full border-4 border-[#0a0a0c] bg-emerald-400" />
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <h3 className="text-base font-semibold" style={{ color: "var(--color-text)" }}>
+                        Week {step.week}: {step.title}
+                      </h3>
+                      <div
+                        className="flex items-center gap-3 text-xs uppercase tracking-wide"
+                        style={{ color: "var(--color-dim)" }}
+                      >
+                        <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] font-medium tracking-widest text-slate-400">
+                          {step.status}
+                        </span>
+                        <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] font-medium tracking-widest text-slate-400">
+                          {step.estimatedHours}h
+                        </span>
+                      </div>
                     </div>
+                    <p className="mt-1 text-sm leading-7" style={{ color: "var(--color-muted)" }}>
+                      {step.description}
+                    </p>
+                    {step.resourceUrl ? (
+                      <a
+                        href={step.resourceUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-3 inline-flex w-fit items-center gap-2 rounded-lg bg-white/5 px-3 py-2 text-sm transition hover:bg-white/10"
+                        style={{ color: "var(--color-text)" }}
+                      >
+                        <img 
+                          src={getFaviconUrl(step.resourceUrl)} 
+                          alt="" 
+                          className="h-4 w-4 rounded-sm" 
+                          loading="lazy"
+                        />
+                        {step.resourceTitle ?? "Open recommended resource"}
+                      </a>
+                    ) : null}
                   </div>
-                  <p className="mt-2 text-sm leading-7" style={{ color: "var(--color-muted)" }}>
-                    {step.description}
-                  </p>
-                  {step.resourceUrl ? (
-                    <a
-                      href={step.resourceUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-4 inline-flex items-center gap-2 rounded-lg bg-white/5 px-3 py-2 text-sm transition hover:bg-white/10"
-                      style={{ color: "var(--color-text)" }}
-                    >
-                      <img 
-                        src={getFaviconUrl(step.resourceUrl)} 
-                        alt="" 
-                        className="h-4 w-4 rounded-sm" 
-                        loading="lazy"
-                      />
-                      {step.resourceTitle ?? "Open recommended resource"}
-                    </a>
-                  ) : null}
                 </div>
               ))}
             </div>
