@@ -3,6 +3,15 @@ import { PageShell } from "@/components/ui/page-shell";
 import { requireUser } from "@/lib/dal";
 import { getRecommendations } from "@/lib/services/recommendations";
 
+function getFaviconUrl(urlString: string) {
+  try {
+    const domain = new URL(urlString).hostname;
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+  } catch {
+    return "";
+  }
+}
+
 export default async function RecommendationsPage() {
   const user = await requireUser();
   const recommendationsState = await getRecommendations(user.id, user.onboardingCompletedAt);
@@ -12,6 +21,7 @@ export default async function RecommendationsPage() {
       eyebrow="Recommendations"
       title="Course and practice recommendations matched to your learner profile."
       description="Each item here belongs to the signed-in user and is created from the assessment result plus the course catalog stored in the database."
+      domain={user.learnerProfile?.primaryInterest}
     >
       {recommendationsState.status === "onboarding-required" ? (
         <EmptyState
@@ -51,9 +61,15 @@ export default async function RecommendationsPage() {
                 href={item.url}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-4 inline-flex text-sm transition"
-                style={{ color: "var(--color-accent-dim)" }}
+                className="mt-4 inline-flex items-center gap-2 rounded-lg bg-white/5 px-3 py-2 text-sm transition hover:bg-white/10"
+                style={{ color: "var(--color-text)" }}
               >
+                <img 
+                  src={getFaviconUrl(item.url)} 
+                  alt="" 
+                  className="h-4 w-4 rounded-sm" 
+                  loading="lazy"
+                />
                 Open resource
               </a>
             </article>

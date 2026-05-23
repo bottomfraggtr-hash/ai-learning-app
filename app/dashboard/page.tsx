@@ -22,6 +22,7 @@ export default async function DashboardPage() {
       eyebrow="Dashboard"
       title="See your momentum, next action, and personalized learning direction in one place."
       description="This dashboard reads only your authenticated records. No seeded fallback profile is injected, so every card reflects either real database data or a clear onboarding state."
+      domain={roadmapState.status === "ready" ? roadmapState.roadmap.domain : null}
     >
       {snapshot.status === "onboarding-required" ? (
         <EmptyState

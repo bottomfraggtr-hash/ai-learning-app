@@ -12,6 +12,7 @@ export default async function CareerPage() {
       eyebrow="Career Guidance"
       title="Career suggestions grounded in your assessment and preferred stack."
       description="These suggestions are generated per learner and stored in the database instead of being shared starter cards."
+      domain={user.learnerProfile?.primaryInterest}
     >
       {careersState.status === "onboarding-required" ? (
         <EmptyState

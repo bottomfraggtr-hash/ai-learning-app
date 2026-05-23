@@ -3,6 +3,15 @@ import { PageShell } from "@/components/ui/page-shell";
 import { requireUser } from "@/lib/dal";
 import { getRoadmap } from "@/lib/services/roadmap";
 
+function getFaviconUrl(urlString: string) {
+  try {
+    const domain = new URL(urlString).hostname;
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+  } catch {
+    return "";
+  }
+}
+
 export default async function RoadmapPage() {
   const user = await requireUser();
   const roadmapState = await getRoadmap(user.id, user.onboardingCompletedAt);
@@ -12,6 +21,7 @@ export default async function RoadmapPage() {
       eyebrow="Roadmap"
       title="A structured learning plan shaped by real onboarding and assessment data."
       description="This roadmap reads from your account records instead of shared starter content, so pacing and milestones stay tied to your preferred stack and current level."
+      domain={roadmapState.status === "ready" ? roadmapState.roadmap.domain : null}
     >
       {roadmapState.status === "onboarding-required" ? (
         <EmptyState
@@ -100,9 +110,15 @@ export default async function RoadmapPage() {
                       href={step.resourceUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="mt-3 inline-flex text-sm transition"
-                      style={{ color: "var(--color-accent-dim)" }}
+                      className="mt-4 inline-flex items-center gap-2 rounded-lg bg-white/5 px-3 py-2 text-sm transition hover:bg-white/10"
+                      style={{ color: "var(--color-text)" }}
                     >
+                      <img 
+                        src={getFaviconUrl(step.resourceUrl)} 
+                        alt="" 
+                        className="h-4 w-4 rounded-sm" 
+                        loading="lazy"
+                      />
                       {step.resourceTitle ?? "Open recommended resource"}
                     </a>
                   ) : null}
